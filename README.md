@@ -1,1 +1,1 @@
-# Quran
+# botQuran Discord
