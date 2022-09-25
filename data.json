@@ -1,0 +1,18 @@
+{
+    "1003371531201675394": {
+        "volume": 0.50,
+        "staychannel": {
+            "status": true,
+            "channelID": "1010592471455113328"
+        },
+        "radio": "https://Qurango.net/radio/tarateel"
+    },
+    "764236892426076191": {
+        "volume": 0.50,
+        "staychannel": {
+            "status": false,
+            "channelID": "872706275799093258"
+        },
+        "radio": "https://Qurango.net/radio/tarateel"
+    }
+}
