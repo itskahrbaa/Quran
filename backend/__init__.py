@@ -26,7 +26,7 @@ class Data():
                 json.dump(self.defaultdata, data, indent=4)
             return self.defaultdata[str(guild.id)]
 
-    def update(self, ctx: discord.ApplicationContext, volume: float = None, stayChannel:bool = None, channelId:str = None, radio:str = None):
+    def update(self, ctx: commands.Context, volume: float = None, stayChannel:bool = None, channelId:str = None, radio:str = None):
         """ Json وظيفة الـ `تعديل` علي اي معلومة داخل """
         text = ""
         try:
@@ -84,7 +84,7 @@ class Quran():
             return
         guild.voice_client.play(source, after=lambda e: print(f"Player error: {e}") if e else None)
 
-    async def play_url(self, ctx: discord.ApplicationContext, reciter: str):
+    async def play_url(self, ctx: commands.Context, reciter: str):
         if ctx.voice_client is None:
             if ctx.author.voice:
                 await ctx.author.voice.channel.connect()
@@ -98,9 +98,12 @@ class Quran():
         source = discord.PCMVolumeTransformer(discord.FFmpegPCMAudio(reciter))
         ctx.guild.voice_client.play(source, after=lambda e: print(f"Player error: {e}") if e else None)
 
-    async def play_reciter(self, ctx: discord.ApplicationContext, reciter:str, sura:int):
-        reciters = Reciters.get_reciters()
-        result = get_close_matches(reciter, reciters, cutoff=0.5)
+    async def play_reciter(self, ctx: commands.Context, reciter:str, sura:int, arabic: bool = True):
+        if arabic:
+            reciters = Reciters.get_reciters()[0]
+        else:
+            reciters = Reciters.get_reciters()[1]
+        result = get_close_matches(reciter, reciters, cutoff=0.5)  
         reciterinfo = reciters[result[0]]
         url = reciterinfo["server"]+"/"+'{:03}'.format(sura)+".mp3"
         if ctx.voice_client is None:
@@ -122,7 +125,7 @@ class Quran():
     # ==========================
     # TODO : مسودة
     # ==========================
-    # def currentData(self, context: discord.ApplicationContext, args):
+    # def currentData(self, context: commands.Context, args):
     #     """يسحب البيانات الخاصة بالقارئ الذي يعمل في الخلفية `الصوت` و `رابط القارئ` و `ايدي الغرفة الصوتية`"""
     #     changes = {"guild":str(context.guild.id)}
     #     voice = context.voice_client
@@ -138,7 +141,7 @@ class Quran():
 
     
     # class Dropdown(discord.ui.Select):
-    #     def __init__(self, ctx: discord.ApplicationContext, bot_: discord.Bot):
+    #     def __init__(self, ctx: commands.Context, bot_: discord.Bot):
     #         self.bot = bot_
     #         self.defaultdata: dict = json.load(open("data.json", encoding='utf-8'))
 
@@ -183,9 +186,15 @@ class Reciters:
     
     def get_reciters(): # هيتسمح عند التحديث ! الجديد 
         res = requests.get('https://api.mp3quran.net/reciters/_arabic.json')
+        resE = requests.get('https://api.mp3quran.net/reciters/_english.json')
         response = json.loads(res.text)
+        responseE = json.loads(resE.text)
         reciters = {}
+        recitersE = {}
         for i in response["reciters"]:
             reciters.update({
             i["name"]: {"name":i["name"], "id":i['id'], "server":i['Server'], "rewaya":i['rewaya'], "count":i['count'], "letter":i['letter'], "suras":i['suras']}})
-        return reciters
+        for i in responseE["reciters"]:
+            recitersE.update({
+            i["name"]: {"name":i["name"], "id":i['id'], "server":i['Server'], "rewaya":i['rewaya'], "count":i['count'], "letter":i['letter'], "suras":i['suras']}})
+        return (reciters,recitersE)
